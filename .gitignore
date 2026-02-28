@@ -1,0 +1,31 @@
+# Environment variables — NEVER commit these
+.env
+
+# Dependencies
+node_modules/
+
+# Debug audio files
+debug-output.pcm
+debug-output.wav
+test-output.pcm
+test-output.wav
+*.pcm
+*.wav
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temp files
+tmp/
+temp/
