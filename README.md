@@ -43,7 +43,7 @@ livekit-voice-agent/
 ## ⚙️ Requirements
 
 - **Node.js** >= 18.0.0 (tested on v20.x LTS)
-- **ffmpeg** installed and available in PATH
+- **ffmpeg** installed on your system (see setup below)
 - **LiveKit Cloud** account (free tier) — [https://livekit.io](https://livekit.io)
 - **Groq** account (free tier) — [https://console.groq.com](https://console.groq.com)
 
@@ -64,12 +64,19 @@ npm install
 
 ### 3. Install ffmpeg
 
-**Windows:**
+**Windows (winget):**
 ```bash
-winget install ffmpeg
-# OR download from https://www.gyan.dev/ffmpeg/builds/
-# Extract to C:\ffmpeg and add C:\ffmpeg\bin to your PATH
+winget install --id Gyan.FFmpeg -e --source winget
 ```
+
+**Windows (manual — recommended if winget PATH doesn't work):**
+1. Download from [https://www.gyan.dev/ffmpeg/builds/](https://www.gyan.dev/ffmpeg/builds/) — get `ffmpeg-release-essentials.zip`
+2. Extract it somewhere permanent, e.g. `C:\ffmpeg`
+3. Find the full path to `ffmpeg.exe`, e.g:
+   ```
+   C:\ffmpeg\bin\ffmpeg.exe
+   ```
+4. Add `FFMPEG_PATH` to your `.env` file (see Environment Variables below)
 
 **macOS:**
 ```bash
@@ -81,10 +88,12 @@ brew install ffmpeg
 sudo apt install ffmpeg
 ```
 
-Verify:
+Verify (macOS/Linux):
 ```bash
 ffmpeg -version
 ```
+
+> ⚠️ **Windows note:** On Windows, ffmpeg installed via winget may not be available in Node's PATH even if it works in PowerShell. If you get a `'ffmpeg' is not recognized` error, set `FFMPEG_PATH` in your `.env` to the full path of `ffmpeg.exe` — the agent will use that directly instead of relying on PATH.
 
 ### 4. Configure environment variables
 ```bash
@@ -115,6 +124,10 @@ LIVEKIT_API_KEY=your_livekit_api_key
 LIVEKIT_API_SECRET=your_livekit_api_secret
 LIVEKIT_ROOM_NAME=voice-agent-room
 GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxxxxxx
+
+# Windows only — set this if ffmpeg is not in your system PATH
+# Find the path by running: where.exe ffmpeg  or  Get-Command ffmpeg
+FFMPEG_PATH=C:\ffmpeg\bin\ffmpeg.exe
 ```
 
 | Variable | Description | Required |
@@ -124,6 +137,7 @@ GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxxxxxx
 | `LIVEKIT_API_SECRET` | LiveKit API Secret from dashboard | ✅ |
 | `LIVEKIT_ROOM_NAME` | Room the agent joins (default: `voice-agent-room`) | ✅ |
 | `GROQ_API_KEY` | Groq API key for Whisper STT + LLaMA3 | ✅ |
+| `FFMPEG_PATH` | Full path to ffmpeg.exe — Windows only if PATH doesn't work | ⚠️ Windows |
 
 ---
 
@@ -223,7 +237,7 @@ If no speech is detected for 20 seconds, the agent plays a single reminder — *
 - Short utterances under ~0.2s are skipped to avoid transcribing noise
 - Agent joins a single room at startup — no multi-room support
 - Conversation history is capped at 10 messages to stay within Groq token limits
-- ffmpeg must be installed separately and available in PATH
+- On Windows, ffmpeg installed via winget may not be in Node's PATH — use `FFMPEG_PATH` in `.env` as a workaround
 
 ---
 
@@ -236,5 +250,3 @@ If no speech is detected for 20 seconds, the agent plays a single reminder — *
 | `SILENCE_TIMEOUT` | `src/silenceTimer.js` | `20000ms` | Idle time before reminder |
 | `max_tokens` | `src/llm.js` | `150` | Max LLM response length |
 | `queueSizeMs` | `src/agent.js` | `5000` | Audio queue buffer size |
-
----
